@@ -51,7 +51,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     # Convert time string to datetime
     start_date = f"{radiosonde_metadata['start_time_dt']:%Y-%m-%d}"
-    print(start_date)
     sonde_time_dt = []
 
     for this_time in df["TimeUTC"]:
@@ -59,7 +58,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     # Load sonde system metadata
     sonde_system_info = SondeInfo(radiosonde_metadata['Station name'])
-    print(sonde_system_info.name)
     # Set up file name
     # use format: radiosonde_woest_ashfarm_20231010_112200_v1
     date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d_%H%M%S")
@@ -76,13 +74,12 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
             + f'{max(df["Lon"][:]):0.6f}' + ('E' if max(df["Lon"][:]) >= 0 else 'W')
             )
     sampling_interval = int((sonde_time_dt[1]-sonde_time_dt[0]).seconds)
-    sampling_interval_units = ' second' if sampling_interval == 1 else 'seconds'
 
     # Open NetCDF file
     dataset_out = nc.Dataset(netcdf_dir+nc_filename, 'w', format='NETCDF4_CLASSIC')
+    print(netcdf_dir+nc_filename)
 
     # Set up dimensions
-    print(len(df["TimeUTC"]), len(sonde_time_dt))
     time_dim = dataset_out.createDimension('time', len(sonde_time_dt))
 
     # Make sure units are right
@@ -234,7 +231,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     latitudes.valid_min = min(df["Lat"][:])
     latitudes.valid_max = max(df["Lat"][:])
     latitudes.cell_methods = 'time: point'
-    print(type(min(df["Lat"][:])), type(max(df["Lat"][:])))
 
     longitudes = dataset_out.createVariable('longitude', np.float32, ('time',), fill_value=this_fill_value)
     longitudes.type = 'float32'
@@ -325,7 +321,18 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     elapsed_times.valid_min = min(df["Elapsed time"][:])
     elapsed_times.valid_max = max(df["Elapsed time"][:])
 
-    print("NOTE: Ascent rate is wrong in first couple of lines of first launches from Ash_Farm! Need to deal with this")
+    # qc_flags = dataset_out.createVariable('qc_flag', np.byte, ('time',), fill_value=this_fill_value)
+    # qc_flags.type = 'byte'
+    # qc_flags.dimension = 'time'
+    # qc_flags.units = '1'
+    # qc_flags.standard_name = ''
+    # qc_flags.long_name = 'Data Quality flag'
+    # qc_flags.flag_values = '0b,1b,2b,3b'
+    # qc_flags.flag_meanings = ('not_used\n' +
+    #                           'good_data\n' +
+    #                           'suspect_data_no_measurable_ascent_rate\n' +
+    #                           'suspect_data_horizontal_wind_speed_equals_0_m_s-1\n'
+    #                           )
 
     # replace NaNs with the fill value (done after min and max operations to avoid minimum reading fill value)
     df = df.fill_nan(this_fill_value)
@@ -357,11 +364,11 @@ def convert_sondes_to_netcdf(raw_dir, netcdf_dir):
         current_search = raw_dir + station + '/' + file_search
         edt_file_list = sorted(glob.glob(current_search))
 
-        # for current_edt_file in edt_file_list:
-        current_edt_file = edt_file_list[0]
-        print(current_edt_file)
-        df, radiosonde_metadata, data_units = do_radiosondes(current_edt_file, netcdf_dir)
-        save_netcdf_file(df, radiosonde_metadata, netcdf_dir)
+        # current_edt_file = edt_file_list[0]
+        for current_edt_file in edt_file_list:
+            print(current_edt_file)
+            df, radiosonde_metadata, data_units = do_radiosondes(current_edt_file, netcdf_dir)
+            save_netcdf_file(df, radiosonde_metadata, netcdf_dir)
 
 
 if __name__ == "__main__":
