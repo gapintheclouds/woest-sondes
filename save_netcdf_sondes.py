@@ -60,13 +60,13 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     sonde_system_info = SondeInfo(radiosonde_metadata['Station name'])
     # Set up file name
     # use format: radiosonde_woest_ashfarm_20231010_112200_v1
-    date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d_%H%M%S")
-    product_version_number = '0.1'
-    software_version_number = '0.1'
+    date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d-%H%M%S")
+    product_version_number = 'v0.1'
+    software_version_number = 'v0.1'
     nc_filename = (f"{sonde_system_info.instrument_name}_{radiosonde_metadata['Station name'].lower()}_{date_string}_"
-                   f"sonde_woest_v{product_version_number}.nc")
+                   f"sonde_woest_{product_version_number}.nc")
     current_time = dt.datetime.now(dt.timezone.utc)
-    current_time_string = current_time.strftime('%Y-%m-%dT%H:%M:%S%z')
+    current_time_string = current_time.strftime('%Y-%m-%dT%H:%M:%S') # %z: removed time zone
     lat_lon_string = (
             (f'{min(df["Lat"][:]):0.6f}' + ('N' if min(df["Lat"][:]) >= 0 else 'S') + ' '
              + f'{min(df["Lon"][:]):0.6f}' + ('E' if min(df["Lon"][:]) >= 0 else 'W')) + ', '
@@ -91,9 +91,15 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
         elapsed_time = pl.Series(float((i - sonde_time_dt[0]).seconds) for i in list(sonde_time_dt))
         df = df.with_columns(elapsed_time.alias("Elapsed time"))
 
+    # Set source
+    if radiosonde_metadata['Station name'] == 'AshFarm':
+        data_source = 'NCAS Vaisala Sounding Station unit 1'
+    else:
+        data_source = 'Vaisala MW41 sounding system'
+
     # Global attributes
-    dataset_out.Conventions = 'CF-1.6, NCAS-AMF-2.1.0'
-    dataset_out.source = 'Vaisala MW41 sounding system'
+    dataset_out.Conventions = 'CF-1.6, NCAS-AMF-2.0.0'
+    dataset_out.source = data_source
     dataset_out.instrument_manufacturer = 'Vaisala'
     dataset_out.instrument_model = (radiosonde_metadata["Sonde type"]
                                     + ' (software v' + radiosonde_metadata["Sonde software version"] + ')'
@@ -107,22 +113,25 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     dataset_out.institution = 'National Centre for Atmospheric Science (NCAS)'
     dataset_out.processing_software_url = 'https://github.com/gapintheclouds/woest-sondes'
     dataset_out.processing_software_version = software_version_number
+    dataset_out.calibration_sensitivity = 'Not Applicable'
+    dataset_out.calibration_certification_date = 'N/A'
+    dataset_out.calibration_certification_url = 'N/A'
     dataset_out.sampling_interval = f"{sampling_interval} {'second' if sampling_interval == 1 else 'seconds'}"
     dataset_out.averaging_interval = f"{sampling_interval} {'second' if sampling_interval == 1 else 'seconds'}"
     dataset_out.product_version = product_version_number
-    dataset_out.processing_level = '1'
+    dataset_out.processing_level = 1
     dataset_out.last_revised_date = current_time_string
     dataset_out.project = 'WesCon – Observing the Evolving Structures of Turbulence (WOEST)'
     dataset_out.project_principal_investigator = 'Dr Ryan Neely III'
     dataset_out.project_principal_investigator_email = 'ryan.neely@ncas.ac.uk'
     dataset_out.project_principal_investigator_url = 'https://orcid.org/0000-0003-4560-4812'
-    dataset_out.licence = 'Data usage licence - UK Government Open Licence agreement: \
-    http://www.nationalarchives.gov.uk/doc/open-government-licence'
-    dataset_out.acknowledgement = 'Acknowledgement of NCAS as the data provider is required \
-    whenever and wherever these data are used'
+    dataset_out.licence = "".join(['Data usage licence - UK Government Open Licence agreement: ',
+                                    'http://www.nationalarchives.gov.uk/doc/open-government-licence'])
+    dataset_out.acknowledgement = "".join(['Acknowledgement of NCAS as the data provider is required ',
+                                            'whenever and wherever these data are used'])
     dataset_out.platform = 'Launch location: ' + radiosonde_metadata["Station name"]
-    dataset_out.platform_type = 'trajectory'
-    dataset_out.deployment_mode = 'land'
+    dataset_out.platform_type = 'moving_platform'
+    dataset_out.deployment_mode = 'trajectory'
     dataset_out.title = 'Radiosonde ascent'
     dataset_out.featureType = 'timeSeriesProfile'
     dataset_out.time_coverage_start = sonde_time_dt[0].strftime('%Y-%m-%dT%H:%M:%S')
@@ -130,25 +139,25 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     dataset_out.geospatial_bounds = lat_lon_string
     dataset_out.platform_altitude = radiosonde_metadata["Release point height from sea level"]
     dataset_out.location_keywords = radiosonde_metadata["Station name"]
-    dataset_out.amf_vocabularies_release = 'https://github.com/ncasuk/AMF_CVs/releases/tag/v2.1.0'
-    dataset_out.history = current_time_string + ' - Initial processing.'
+    dataset_out.amf_vocabularies_release = 'https://github.com/ncasuk/AMF_CVs/releases/tag/v2.0.0'
+    dataset_out.history = current_time_string + ' - Initial processing. Flags not implemented yet.'
     dataset_out.comment = (f"Sonde system owner: {sonde_system_info.system_owner}, "
                            f"Sonde system operator: {sonde_system_info.system_operator}")
 
     # Set up variables
-    times = dataset_out.createVariable('time', np.float64, ('time',))
-    times.type = 'float64'
+    times = dataset_out.createVariable('time', np.double, ('time',))
+    times.type = 'double'
     times.dimension = 'time'
     times.units = 'seconds since 1970-01-01 00:00:00'
     times.standard_name = 'time'
-    times.long_name = 'Time [UTC] (seconds since 1970-01-01 00:00:00)'
+    times.long_name = 'Time (seconds since 1970-01-01 00:00:00)'
     times.axis = 'T'
     times.valid_min = (sonde_time_dt[0] - dt.datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
     times.valid_max = (sonde_time_dt[-1] - dt.datetime(1970, 1, 1, 0, 0, 0)).total_seconds()
     times.calendar = 'standard'
 
     day_of_year = dataset_out.createVariable('day_of_year', np.float32, ('time',))
-    day_of_year.type = 'float32'
+    day_of_year.type = 'float'
     day_of_year.dimension = 'time'
     day_of_year.units = '1'
     day_of_year.standard_name = ''
@@ -157,7 +166,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     day_of_year.valid_max = sonde_time_dt[-1].timetuple().tm_yday
 
     year = dataset_out.createVariable('year', np.int32, ('time',))
-    year.type = 'int32'
+    year.type = 'int'
     year.dimension = 'time'
     year.units = '1'
     year.standard_name = ''
@@ -166,7 +175,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     year.valid_max = sonde_time_dt[-1].year
 
     month = dataset_out.createVariable('month', np.int32, ('time',))
-    month.type = 'int32'
+    month.type = 'int'
     month.dimension = 'time'
     month.units = '1'
     month.standard_name = ''
@@ -175,7 +184,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     month.valid_max = 12
 
     day = dataset_out.createVariable('day', np.int32, ('time',))
-    day.type = 'int32'
+    day.type = 'int'
     day.dimension = 'time'
     day.units = '1'
     day.standard_name = ''
@@ -184,7 +193,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     day.valid_max = 31
 
     hour = dataset_out.createVariable('hour', np.int32, ('time',))
-    hour.type = 'int32'
+    hour.type = 'int'
     hour.dimension = 'time'
     hour.units = '1'
     hour.standard_name = ''
@@ -193,7 +202,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     hour.valid_max = 23
 
     minute = dataset_out.createVariable('minute', np.int32, ('time',))
-    minute.type = 'int32'
+    minute.type = 'int'
     minute.dimension = 'time'
     minute.units = '1'
     minute.standard_name = ''
@@ -201,8 +210,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     minute.valid_min = 0
     minute.valid_max = 59
 
-    second = dataset_out.createVariable('second', np.float64, ('time',))
-    second.type = 'float64'
+    second = dataset_out.createVariable('second', np.float32, ('time',))
+    second.type = 'float'
     second.dimension = 'time'
     second.units = '1'
     second.standard_name = ''
@@ -211,18 +220,18 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     second.valid_max = 59.99999
 
     altitudes = dataset_out.createVariable('altitude', np.float32, 'time', fill_value=this_fill_value)
-    altitudes.type = 'float32'
+    altitudes.type = 'float'
     altitudes.dimension = 'time'
     altitudes.units = 'm'
     altitudes.standard_name = 'altitude'
-    altitudes.long_name = 'Geometric height above geoid (WGS84).'
+    altitudes.long_name = 'Geometric height above geoid (WGS 84).'
     altitudes.axis = 'Z'
     altitudes.valid_min = min(df["GpsHeightMSL"][:])
     altitudes.valid_max = max(df["GpsHeightMSL"][:])
     altitudes.cell_methods = 'time: point'
 
     latitudes = dataset_out.createVariable('latitude', np.float32, ('time',), fill_value=this_fill_value)
-    latitudes.type = 'float32'
+    latitudes.type = 'float'
     latitudes.dimension = 'time'
     latitudes.units = 'degrees_north'
     latitudes.standard_name = 'latitude'
@@ -233,7 +242,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     latitudes.cell_methods = 'time: point'
 
     longitudes = dataset_out.createVariable('longitude', np.float32, ('time',), fill_value=this_fill_value)
-    longitudes.type = 'float32'
+    longitudes.type = 'float'
     longitudes.dimension = 'time'
     longitudes.units = 'degrees_east'
     longitudes.standard_name = 'longitude'
@@ -244,7 +253,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     longitudes.cell_methods = 'time: point'
 
     air_pressures = dataset_out.createVariable('air_pressure', np.float32, ('time',), fill_value=this_fill_value)
-    air_pressures.type = 'float32'
+    air_pressures.type = 'float'
     air_pressures.dimension = 'time'
     air_pressures.units = 'hPa'
     air_pressures.standard_name = 'air_pressure'
@@ -255,11 +264,11 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     air_pressures.coordinates = 'latitude longitude altitude'
 
     air_temperatures = dataset_out.createVariable('air_temperature', np.float32, ('time',), fill_value=this_fill_value)
-    air_temperatures.type = 'float32'
+    air_temperatures.type = 'float'
     air_temperatures.dimension = 'time'
     air_temperatures.units = 'K'
     air_temperatures.standard_name = 'air_temperature'
-    air_temperatures.long_name = 'Air Temperature'
+    air_temperatures.long_name = 'AirTemperature'
     air_temperatures.valid_min = min(df["TempK"][:])
     air_temperatures.valid_max = max(df["TempK"][:])
     air_temperatures.cell_methods = 'time: point'
@@ -267,7 +276,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     relative_humiditys = dataset_out.createVariable('relative_humidity', np.float32, ('time',),
                                                     fill_value=this_fill_value)
-    relative_humiditys.type = 'float32'
+    relative_humiditys.type = 'float'
     relative_humiditys.dimension = 'time'
     relative_humiditys.units = '%'
     relative_humiditys.standard_name = 'relative_humidity'
@@ -278,7 +287,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     relative_humiditys.coordinates = 'latitude longitude altitude'
 
     wind_speeds = dataset_out.createVariable('wind_speed', np.float32, ('time',), fill_value=this_fill_value)
-    wind_speeds.type = 'float32'
+    wind_speeds.type = 'float'
     wind_speeds.dimension = 'time'
     wind_speeds.units = 'm s-1'
     wind_speeds.standard_name = 'wind_speed'
@@ -290,7 +299,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     wind_from_directions = dataset_out.createVariable('wind_from_direction', np.float32, ('time',),
                                                       fill_value=this_fill_value)
-    wind_from_directions.type = 'float32'
+    wind_from_directions.type = 'float'
     wind_from_directions.dimension = 'time'
     wind_from_directions.units = 'degree'
     wind_from_directions.standard_name = 'wind_from_direction'
@@ -302,7 +311,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     upward_balloon_velocitys = dataset_out.createVariable('upward_balloon_velocity', np.float32, ('time',),
                                                           fill_value=this_fill_value)
-    upward_balloon_velocitys.type = 'float32'
+    upward_balloon_velocitys.type = 'float'
     upward_balloon_velocitys.dimension = 'time'
     upward_balloon_velocitys.units = 'm s-1'
     upward_balloon_velocitys.standard_name = ''
@@ -313,7 +322,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     upward_balloon_velocitys.coordinates = 'latitude longitude altitude'
 
     elapsed_times = dataset_out.createVariable('elapsed_time', np.float32, ('time',), fill_value=this_fill_value)
-    elapsed_times.type = 'float32'
+    elapsed_times.type = 'float'
     elapsed_times.dimension = 'time'
     elapsed_times.units = 's'
     elapsed_times.standard_name = ''
