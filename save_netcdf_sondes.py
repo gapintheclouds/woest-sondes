@@ -141,8 +141,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     dataset_out.location_keywords = radiosonde_metadata["Station name"]
     dataset_out.amf_vocabularies_release = 'https://github.com/ncasuk/AMF_CVs/releases/tag/v2.0.0'
     dataset_out.history = current_time_string + ' - Initial processing. Flags not implemented yet.'
-    dataset_out.comment = (f"Sonde system owner: {sonde_system_info.system_owner}, "
-                           f"Sonde system operator: {sonde_system_info.system_operator}")
+    dataset_out.comment = (f"Instrument owner: {sonde_system_info.system_owner}, "
+                           f"Instrument operator: {sonde_system_info.system_operator}")
 
     # Set up variables
     times = dataset_out.createVariable('time', np.double, ('time',))
