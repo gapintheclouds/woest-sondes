@@ -146,7 +146,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     # Set up variables
     times = dataset_out.createVariable('time', np.double, ('time',))
-    times.type = 'double'
     times.dimension = 'time'
     times.units = 'seconds since 1970-01-01 00:00:00'
     times.standard_name = 'time'
@@ -157,7 +156,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     times.calendar = 'standard'
 
     day_of_year = dataset_out.createVariable('day_of_year', np.float32, ('time',))
-    day_of_year.type = 'float'
     day_of_year.dimension = 'time'
     day_of_year.units = '1'
     day_of_year.standard_name = ''
@@ -166,7 +164,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     day_of_year.valid_max = sonde_time_dt[-1].timetuple().tm_yday
 
     year = dataset_out.createVariable('year', np.int32, ('time',))
-    year.type = 'int'
     year.dimension = 'time'
     year.units = '1'
     year.standard_name = ''
@@ -175,7 +172,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     year.valid_max = sonde_time_dt[-1].year
 
     month = dataset_out.createVariable('month', np.int32, ('time',))
-    month.type = 'int'
     month.dimension = 'time'
     month.units = '1'
     month.standard_name = ''
@@ -184,7 +180,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     month.valid_max = 12
 
     day = dataset_out.createVariable('day', np.int32, ('time',))
-    day.type = 'int'
     day.dimension = 'time'
     day.units = '1'
     day.standard_name = ''
@@ -193,7 +188,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     day.valid_max = 31
 
     hour = dataset_out.createVariable('hour', np.int32, ('time',))
-    hour.type = 'int'
     hour.dimension = 'time'
     hour.units = '1'
     hour.standard_name = ''
@@ -202,7 +196,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     hour.valid_max = 23
 
     minute = dataset_out.createVariable('minute', np.int32, ('time',))
-    minute.type = 'int'
     minute.dimension = 'time'
     minute.units = '1'
     minute.standard_name = ''
@@ -211,7 +204,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     minute.valid_max = 59
 
     second = dataset_out.createVariable('second', np.float32, ('time',))
-    second.type = 'float'
     second.dimension = 'time'
     second.units = '1'
     second.standard_name = ''
@@ -220,7 +212,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     second.valid_max = 59.99999
 
     altitudes = dataset_out.createVariable('altitude', np.float32, 'time', fill_value=this_fill_value)
-    altitudes.type = 'float'
     altitudes.dimension = 'time'
     altitudes.units = 'm'
     altitudes.standard_name = 'altitude'
@@ -231,7 +222,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     altitudes.cell_methods = 'time: point'
 
     latitudes = dataset_out.createVariable('latitude', np.float32, ('time',), fill_value=this_fill_value)
-    latitudes.type = 'float'
     latitudes.dimension = 'time'
     latitudes.units = 'degrees_north'
     latitudes.standard_name = 'latitude'
@@ -242,7 +232,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     latitudes.cell_methods = 'time: point'
 
     longitudes = dataset_out.createVariable('longitude', np.float32, ('time',), fill_value=this_fill_value)
-    longitudes.type = 'float'
     longitudes.dimension = 'time'
     longitudes.units = 'degrees_east'
     longitudes.standard_name = 'longitude'
@@ -253,7 +242,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     longitudes.cell_methods = 'time: point'
 
     air_pressures = dataset_out.createVariable('air_pressure', np.float32, ('time',), fill_value=this_fill_value)
-    air_pressures.type = 'float'
     air_pressures.dimension = 'time'
     air_pressures.units = 'hPa'
     air_pressures.standard_name = 'air_pressure'
@@ -264,7 +252,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     air_pressures.coordinates = 'latitude longitude altitude'
 
     air_temperatures = dataset_out.createVariable('air_temperature', np.float32, ('time',), fill_value=this_fill_value)
-    air_temperatures.type = 'float'
     air_temperatures.dimension = 'time'
     air_temperatures.units = 'K'
     air_temperatures.standard_name = 'air_temperature'
@@ -276,7 +263,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     relative_humiditys = dataset_out.createVariable('relative_humidity', np.float32, ('time',),
                                                     fill_value=this_fill_value)
-    relative_humiditys.type = 'float'
     relative_humiditys.dimension = 'time'
     relative_humiditys.units = '%'
     relative_humiditys.standard_name = 'relative_humidity'
@@ -287,7 +273,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     relative_humiditys.coordinates = 'latitude longitude altitude'
 
     wind_speeds = dataset_out.createVariable('wind_speed', np.float32, ('time',), fill_value=this_fill_value)
-    wind_speeds.type = 'float'
     wind_speeds.dimension = 'time'
     wind_speeds.units = 'm s-1'
     wind_speeds.standard_name = 'wind_speed'
@@ -299,7 +284,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     wind_from_directions = dataset_out.createVariable('wind_from_direction', np.float32, ('time',),
                                                       fill_value=this_fill_value)
-    wind_from_directions.type = 'float'
     wind_from_directions.dimension = 'time'
     wind_from_directions.units = 'degree'
     wind_from_directions.standard_name = 'wind_from_direction'
@@ -311,7 +295,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
 
     upward_balloon_velocitys = dataset_out.createVariable('upward_balloon_velocity', np.float32, ('time',),
                                                           fill_value=this_fill_value)
-    upward_balloon_velocitys.type = 'float'
     upward_balloon_velocitys.dimension = 'time'
     upward_balloon_velocitys.units = 'm s-1'
     upward_balloon_velocitys.standard_name = ''
@@ -322,7 +305,6 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     upward_balloon_velocitys.coordinates = 'latitude longitude altitude'
 
     elapsed_times = dataset_out.createVariable('elapsed_time', np.float32, ('time',), fill_value=this_fill_value)
-    elapsed_times.type = 'float'
     elapsed_times.dimension = 'time'
     elapsed_times.units = 's'
     elapsed_times.standard_name = ''
