@@ -28,13 +28,13 @@ class SondeInfo:
             self.system_operator = 'Met Office'
 
         if self.name == 'LAR_A':
-            self.station_name = 'Larkhill_A'
+            self.station_name = 'LarkhillA'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
 
         if self.name == 'Larkhill_B':
-            self.station_name = 'Larkhill_B'
+            self.station_name = 'LarkhillB'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
