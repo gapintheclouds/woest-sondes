@@ -4,6 +4,7 @@ import netCDF4 as nc
 import datetime as dt
 import numpy as np
 import polars as pl
+import os
 
 
 # Class with all the sonde information in.
@@ -51,7 +52,7 @@ class SondeInfo:
             self.system_operator = 'Met Office'
 
 
-def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
+def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     # Replace nulls with NaNs
     this_fill_value = -1.00e+20
 
@@ -148,7 +149,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     dataset_out.amf_vocabularies_release = 'https://github.com/ncasuk/AMF_CVs/releases/tag/v2.0.0'
     dataset_out.history = current_time_string + ' - Initial processing. Flags not implemented yet.'
     dataset_out.comment = (f"Instrument owner: {sonde_system_info.system_owner}, "
-                           f"Instrument operator: {sonde_system_info.system_operator}")
+                           f"Instrument operator: {sonde_system_info.system_operator}, "
+                           f"Original raw data: {current_edt_filename}")
 
     # Set up variables
     times = dataset_out.createVariable('time', np.double, ('time',))
@@ -365,7 +367,7 @@ def convert_sondes_to_netcdf(raw_dir, netcdf_dir):
         for current_edt_file in edt_file_list:
             print(current_edt_file)
             df, radiosonde_metadata, data_units = do_radiosondes(current_edt_file, netcdf_dir)
-            save_netcdf_file(df, radiosonde_metadata, netcdf_dir)
+            save_netcdf_file(df, radiosonde_metadata, netcdf_dir, os.path.basename(current_edt_file))
 
 
 if __name__ == "__main__":
