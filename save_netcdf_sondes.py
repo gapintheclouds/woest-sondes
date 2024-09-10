@@ -68,8 +68,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     # Set up file name
     # use format: radiosonde_woest_ashfarm_20231010_112200_v1
     date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d-%H%M%S")
-    product_version_number = 'v0.1'
-    software_version_number = 'v0.1'
+    product_version_number = 'v1.0'
+    software_version_number = 'v0.2'
     nc_filename = (f"{sonde_system_info.instrument_name}_{sonde_system_info.station_name.lower()}_{date_string}_"
                    f"sonde_woest_{product_version_number}.nc")
     current_time = dt.datetime.now(dt.timezone.utc)
