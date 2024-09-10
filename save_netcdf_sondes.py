@@ -15,31 +15,37 @@ class SondeInfo:
         self.name = site_name
 
         if self.name == 'AshFarm':
+            self.station_name = 'AshFarm'
             self.system_owner = 'Atmospheric Measurement and Observation Facility'
             self.instrument_name = 'ncas-radiosonde-1'
             self.system_operator = 'University of Leeds'
 
         if self.name == 'Chilbolton':
+            self.station_name = 'Chilbolton'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
 
         if self.name == 'LAR_A':
+            self.station_name = 'Larkhill_A'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
 
         if self.name == 'Larkhill_B':
+            self.station_name = 'Larkhill_B'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
 
         if self.name == 'Reading':
+            self.station_name = 'Reading'
             self.system_owner = 'University of Reading'
             self.instrument_name = 'uor-radiosonde'
             self.system_operator = 'University of Reading'
 
         if self.name == 'SpireView':
+            self.station_name = 'SpireView'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
@@ -63,7 +69,7 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir):
     date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d-%H%M%S")
     product_version_number = 'v0.1'
     software_version_number = 'v0.1'
-    nc_filename = (f"{sonde_system_info.instrument_name}_{radiosonde_metadata['Station name'].lower()}_{date_string}_"
+    nc_filename = (f"{sonde_system_info.instrument_name}_{sonde_system_info.station_name.lower()}_{date_string}_"
                    f"sonde_woest_{product_version_number}.nc")
     current_time = dt.datetime.now(dt.timezone.utc)
     current_time_string = current_time.strftime('%Y-%m-%dT%H:%M:%S') # %z: removed time zone
