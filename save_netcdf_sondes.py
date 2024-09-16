@@ -20,36 +20,42 @@ class SondeInfo:
             self.system_owner = 'Atmospheric Measurement and Observation Facility'
             self.instrument_name = 'ncas-radiosonde-1'
             self.system_operator = 'University of Leeds'
+            self.data_provider = 'NCAS'
 
         if self.name == 'Chilbolton':
             self.station_name = 'Chilbolton'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
+            self.data_provider = 'Met Office and NCAS'
 
         if self.name == 'LAR_A':
             self.station_name = 'LarkhillA'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
+            self.data_provider = 'Met Office and NCAS'
 
         if self.name == 'Larkhill_B':
             self.station_name = 'LarkhillB'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
+            self.data_provider = 'Met Office and NCAS'
 
         if self.name == 'Reading':
             self.station_name = 'Reading'
             self.system_owner = 'University of Reading'
             self.instrument_name = 'uor-radiosonde'
             self.system_operator = 'University of Reading'
+            self.data_provider = 'University of Reading and NCAS'
 
         if self.name == 'SpireView':
             self.station_name = 'SpireView'
             self.system_owner = 'Met Office'
             self.instrument_name = 'ukmo-radiosonde'
             self.system_operator = 'Met Office'
+            self.data_provider = 'Met Office and NCAS'
 
 
 def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
@@ -68,8 +74,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     # Set up file name
     # use format: radiosonde_woest_ashfarm_20231010_112200_v1
     date_string = radiosonde_metadata['start_time_dt'].strftime("%Y%m%d-%H%M%S")
-    product_version_number = 'v1.0'
-    software_version_number = 'v0.2'
+    product_version_number = 'v1.0.1'
+    software_version_number = 'v0.2.1'
     nc_filename = (f"{sonde_system_info.instrument_name}_{sonde_system_info.station_name.lower()}_{date_string}_"
                    f"sonde_woest_{product_version_number}.nc")
     current_time = dt.datetime.now(dt.timezone.utc)
@@ -134,8 +140,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     dataset_out.project_principal_investigator_url = 'https://orcid.org/0000-0003-4560-4812'
     dataset_out.licence = "".join(['Data usage licence - UK Government Open Licence agreement: ',
                                     'http://www.nationalarchives.gov.uk/doc/open-government-licence'])
-    dataset_out.acknowledgement = "".join(['Acknowledgement of NCAS as the data provider is required ',
-                                            'whenever and wherever these data are used'])
+    dataset_out.acknowledgement = "".join([f'Acknowledgement of {sonde_system_info.data_provider} as the ',
+                                            'data provider is required whenever and wherever these data are used'])
     dataset_out.platform = 'Launch location: ' + sonde_system_info.station_name
     dataset_out.platform_type = 'moving_platform'
     dataset_out.deployment_mode = 'trajectory'
@@ -147,7 +153,8 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     dataset_out.platform_altitude = radiosonde_metadata["Release point height from sea level"]
     dataset_out.location_keywords = sonde_system_info.station_name
     dataset_out.amf_vocabularies_release = 'https://github.com/ncasuk/AMF_CVs/releases/tag/v2.0.0'
-    dataset_out.history = current_time_string + ' - Initial processing. Flags not implemented yet.'
+    dataset_out.history = "".join([current_time_string, ' - v1.0.1: Updated data provider acknowledgement.\n',
+                                   'v1.0: Initial processing. Flags not implemented yet.'])
     dataset_out.comment = (f"Instrument owner: {sonde_system_info.system_owner}, "
                            f"Instrument operator: {sonde_system_info.system_operator}, "
                            f"Original raw data: {current_edt_filename}")
