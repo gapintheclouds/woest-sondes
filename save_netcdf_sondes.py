@@ -107,11 +107,13 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     # Set source
     if sonde_system_info.station_name == 'ash-farm':
         data_source = 'NCAS Vaisala Sounding Station unit 1'
+        conventions = 'CF-1.6, NCAS-AMF-2.0.0'
     else:
         data_source = 'Vaisala MW41 sounding system'
+        conventions = 'CF-1.6'
 
     # Global attributes
-    dataset_out.Conventions = 'CF-1.6, NCAS-AMF-2.0.0'
+    dataset_out.Conventions = conventions
     dataset_out.source = data_source
     dataset_out.instrument_manufacturer = 'Vaisala'
     dataset_out.instrument_model = (radiosonde_metadata["Sonde type"]
