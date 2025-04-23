@@ -88,9 +88,13 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
             )
     sampling_interval = int((sonde_time_dt[1]-sonde_time_dt[0]).seconds)
 
+    # Create NetCDF directories
+    save_netcdf_dir = os.path.join(netcdf_dir, sonde_system_info.station_name, radiosonde_metadata['start_time_dt'].strftime("%Y"), radiosonde_metadata['start_time_dt'].strftime("%m"), radiosonde_metadata['start_time_dt'].strftime("%d"))
+    os.makedirs(save_netcdf_dir, exist_ok=True)
+
     # Open NetCDF file
-    dataset_out = nc.Dataset(netcdf_dir+nc_filename, 'w', format='NETCDF4_CLASSIC')
-    print(netcdf_dir+nc_filename)
+    dataset_out = nc.Dataset(os.path.join(save_netcdf_dir,nc_filename), 'w', format='NETCDF4_CLASSIC')
+    print(os.path.join(save_netcdf_dir,nc_filename))
 
     # Set up dimensions
     time_dim = dataset_out.createDimension('time', len(sonde_time_dt))
