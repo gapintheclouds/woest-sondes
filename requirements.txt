@@ -1,5 +1,5 @@
-certifi==2023.11.17
-cftime==1.6.3
-netCDF4==1.6.5
-numpy==1.26.3
-polars-lts-cpu==0.20.3
+certifi==2025.1.31
+cftime==1.6.4.post1
+netCDF4==1.7.2
+numpy==2.2.5
+polars-lts-cpu==1.27.1

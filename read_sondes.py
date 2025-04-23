@@ -40,6 +40,9 @@ def do_radiosondes(file_name, outdir):
     for column_name in df.columns:
         df = df.rename({column_name: column_name.strip()})
 
+    # Remove empty lines in csv file
+    df = df.filter(pl.col("TimeUTC") != '')
+
 
     df_small = df.select(
         [
@@ -68,9 +71,6 @@ def do_radiosondes(file_name, outdir):
             "Speed": "WindSpeed",
         }
     )
-
-    temp_k = pl.Series([i + 273.15 for i in list(df_small_renamed["Temperature"])])
-    df_small_renamed.replace("Temperature", temp_k)
 
     csv_filename = (
         f"{radiosonde_metadata['System trademark and model']}-{radiosonde_metadata['Station name']}-"
