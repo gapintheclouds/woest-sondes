@@ -81,10 +81,10 @@ def save_netcdf_file(df, radiosonde_metadata, netcdf_dir, current_edt_filename):
     current_time = dt.datetime.now(dt.timezone.utc)
     current_time_string = current_time.strftime('%Y-%m-%dT%H:%M:%S') # %z: removed time zone
     lat_lon_string = (
-            (f'{min(df["Lat"][:]):0.6f}' + ('N' if min(df["Lat"][:]) >= 0 else 'S') + ' '
-             + f'{min(df["Lon"][:]):0.6f}' + ('E' if min(df["Lon"][:]) >= 0 else 'W')) + ', '
-            + f'{max(df["Lat"][:]):0.6f}' + ('N' if max(df["Lat"][:]) >= 0 else 'S') + ' '
-            + f'{max(df["Lon"][:]):0.6f}' + ('E' if max(df["Lon"][:]) >= 0 else 'W')
+            f'{min(df["Lat"][:]):0.6f}' + 'N ' # ('N' if min(df["Lat"][:]) >= 0 else 'S') + ' '
+            + f'{min(df["Lon"][:]):0.6f}' + 'E, ' # ('E' if min(df["Lon"][:]) >= 0 else 'W')) + ', '
+            + f'{max(df["Lat"][:]):0.6f}' + 'N ' # ('N' if max(df["Lat"][:]) >= 0 else 'S') + ' '
+            + f'{max(df["Lon"][:]):0.6f}' + 'E' # ('E' if max(df["Lon"][:]) >= 0 else 'W')
             )
     sampling_interval = int((sonde_time_dt[1]-sonde_time_dt[0]).seconds)
 
